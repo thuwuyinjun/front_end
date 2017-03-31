@@ -1,0 +1,114 @@
+<%@ page language="java" contentType="text/html; charset=gb18030"
+    pageEncoding="gb18030"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<%@ page import="java.sql.*" %>
+<jsp:useBean id="DataSql" scope="page" class="edu.scnu.cn.common.DataSql"></jsp:useBean>
+<meta http-equiv="Content-Type" content="text/html; charset=gb18030">
+<title>留言薄</title>
+<style>
+    body{font-size:12px;text-align:center;}
+    dl  {margin:0;}
+    dt  {background-color:#666;color:#fff;margin:1px;padding:0 3px;}
+    dd  {margin:3px;}
+    div {margin:auto;line-height:150%;text-align:left;width:400px;border:1px solid #666;}
+    #msgInput {margin-top:10px;}
+    dd.button {text-align:center;}
+    dd.button.input{margin:0 20px;}
+</style>
+<script type="text/javascript">
+function addToList(){
+    var msgList=document.getElementById("msgBox");
+    var dl=document.createElement("dl");    
+    var dt=document.createElement("dt");
+    var dd=document.createElement("dd");
+    var dd2=document.createElement("dd");
+    var dd3=document.createElement("dd");
+    msgList.insertBefore(dl,msgList.firstChild);
+    dl.appendChild(dt);
+    dl.appendChild(dd);
+    dl.appendChild(dd2);
+    dl.appendChild(dd3);
+    dt.innerHTML="主　　题："+subject.value;
+    dd.innerHTML="留 言 人："+author.value;
+    dd2.innerHTML="内　　容："+content.value;
+    dd3.innerHTML="时　　间："+time.value;
+    subject.value="";
+    author.value="";
+    content.value="";
+    time.value="";    
+}
+function createXMLHttp(){
+    var xmlhttp;    
+    try{
+        xmlhttp=new XMLHttpRequest();
+    }catch(e){
+        xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    return xmlhttp;
+}
+function delRecord(id){
+
+}
+function ajaxSubmit(){
+    var xmlhttp=createXMLHttp();
+    xmlhttp.onreadystatechange=function(){
+        if(4==xmlhttp.readyState){
+            if(200==xmlhttp.status){
+                //alert(xmlhttp.responseXML);
+                addToList();
+            }else{
+                alert("no");
+            }
+        }
+    }
+    var sql="insert into msgbox values(null,'"+subject.value+"','"+author.value+"','"+content.value+"','"+time.value+"')";
+    var submitUrl="/servlet/AddRecordServlet?sql="+sql;
+    xmlhttp.open("post",submitUrl,true);    
+    xmlhttp.setRequestHeader('Conten-type','application/x-www-form-urlencode');
+    xmlhttp.send(null);
+    return false;    
+}
+</script>
+</head>
+<body>
+<%  
+    Connection conn=DataSql.getConn();  
+    String sql="select * from msgbox order by time DESC";  
+    ResultSet rs=DataSql.getRs(conn,sql);  
+    while(rs.next()){  
+%>
+    <div id="msgBox">  
+        <dl id="dl+<%=rs.getString("id") %>">
+            <dt>主　　题：<%=rs.getString("subject") %></dt>
+            <dd>留 言 人：<%=rs.getString("author") %></dd>
+            <dd>内　　容：<%=rs.getString("content") %></dd>
+            <dd>时　　间：<%=rs.getString("time") %></dd>
+        </dl>
+    </div>
+    
+<%
+    }
+%>
+    <div id="msgInput">
+    <form name="msgForm"  method="POST">
+        <dl>
+            <dt>主　　题：<input type="text" name="subject" size="42" id="subject"></dt>
+            <dd>留 言 人：<input type="text" name="author" size="42"　id="author"></dd>
+            <dd>内　　容：<textarea rows="10" cols="42" name="content" id="content"></textarea></dd>
+            <dd>时　　间：<input type="text" size="42" name="time" id="time"></dd>
+            <dd class="button"><input type="button" onClick="ajaxSubmit()" value="提交" >
+                <input type="Submit"  value="提交2" >
+            </dd>
+        </dl>
+    </form>
+    </div>
+<script>
+    var subject=document.forms[0].subject;
+    var author=document.forms[0].author;
+    var content=document.forms[0].content;
+    var time=document.forms[0].time;
+</script>
+</body>
+</html>
